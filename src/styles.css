@@ -2741,3 +2741,444 @@ select option {
     scroll-behavior: auto !important;
   }
 }
+
+/* A shared playback clock drives the packet and the explanation below it. */
+.canvas {
+  height: 395px;
+  margin: 0;
+}
+.network-viewport {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  outline-offset: -3px;
+  overflow: hidden;
+}
+.network-svg {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  user-select: none;
+}
+.camera-world {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition-property: transform;
+  transition-timing-function: ease-out;
+}
+.camera-world.no-transition {
+  transition: none !important;
+}
+.diagram-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 20px 0;
+  flex-shrink: 0;
+}
+.follow-packet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface);
+}
+.follow-packet.active {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--mint) 30%, var(--border));
+  color: var(--mint);
+}
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 1px 3px;
+}
+.zoom-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 27px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+.zoom-controls button:not(:disabled):hover {
+  background: var(--surface-hover);
+  color: var(--mint);
+}
+.zoom-controls output {
+  font:
+    9px 'JetBrains Mono Variable',
+    monospace;
+  width: 39px;
+  text-align: center;
+  color: var(--text);
+}
+.zoom-controls button:last-child {
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  margin-left: 3px;
+  padding-left: 4px;
+}
+.diagram-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  min-height: 27px;
+  padding: 0 20px 8px;
+  font-size: 9px;
+  color: var(--subtle);
+  flex-shrink: 0;
+}
+.protected-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--violet);
+  white-space: nowrap;
+}
+.moving-packet {
+  pointer-events: none;
+}
+.packet-trail {
+  opacity: 0.85;
+}
+.canvas-caption.has-journey {
+  display: none;
+}
+.journey-readout {
+  border-top: 1px solid var(--border);
+  padding: 17px 20px 14px;
+  background: color-mix(in srgb, var(--surface-raised) 35%, var(--surface));
+}
+.journey-message {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.journey-message strong {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.message-number {
+  margin-left: auto;
+  align-self: flex-start;
+  white-space: nowrap;
+  font:
+    10px 'JetBrains Mono Variable',
+    monospace;
+  color: var(--subtle);
+  padding-top: 4px;
+}
+.journey-route {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.8;
+}
+.journey-route > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.journey-route svg {
+  color: var(--subtle);
+}
+.packet-stages {
+  display: flex;
+  gap: 14px;
+  margin: 18px 0 14px;
+}
+.packet-stages button {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 7px;
+  padding: 0;
+  font-size: 10px;
+  color: var(--subtle);
+}
+.packet-stages button > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  font:
+    8px 'JetBrains Mono Variable',
+    monospace;
+  flex-shrink: 0;
+}
+.packet-stages button > i {
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+  margin-left: 2px;
+}
+.packet-stages button:last-child {
+  flex: 0 0 auto;
+}
+.packet-stages button:last-child > i {
+  display: none;
+}
+.packet-stages button.active {
+  color: var(--text);
+}
+.packet-stages button.active > span {
+  color: var(--bg);
+  background: var(--mint);
+  border-color: var(--mint);
+}
+.packet-stages button.passed > span {
+  color: var(--mint);
+  background: var(--accent-soft);
+}
+.journey-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--mint);
+  font-weight: 600;
+}
+.journey-now {
+  min-height: 80px;
+}
+.journey-now p {
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.journey-readout.loss .journey-phase {
+  color: var(--rose);
+}
+.journey-readout.loss .packet-stages button:last-child.active > span {
+  background: var(--rose);
+  border-color: var(--rose);
+}
+.packet-scrubber {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.packet-scrubber > span {
+  font-size: 9px;
+  color: var(--subtle);
+  white-space: nowrap;
+}
+.packet-scrubber input {
+  flex: 1;
+  min-width: 40px;
+  accent-color: var(--mint);
+  height: 15px;
+  cursor: pointer;
+}
+.packet-scrubber output {
+  font:
+    9px 'JetBrains Mono Variable',
+    monospace;
+  color: var(--muted);
+  min-width: 32px;
+  text-align: right;
+}
+.playback-progress i {
+  transition: none;
+}
+.packet-explanation {
+  padding-top: 19px;
+  margin: 20px 0 8px;
+  border-top: 1px solid var(--border);
+}
+.packet-explanation > .eyebrow {
+  font-size: 8px;
+  color: var(--mint);
+  letter-spacing: 1px;
+}
+.packet-explanation h3 {
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.6;
+  margin: 11px 0 9px;
+}
+.packet-explanation > p,
+.packet-context p {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.85;
+}
+.packet-quick-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+  margin: 19px 0 15px;
+}
+.packet-quick-facts dt {
+  font-size: 9px;
+  color: var(--subtle);
+  margin-bottom: 4px;
+}
+.packet-quick-facts dd {
+  font:
+    10px 'JetBrains Mono Variable',
+    monospace;
+  margin: 0;
+}
+.packet-context {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.packet-context summary {
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.packet-context p {
+  margin-top: 9px;
+}
+.inspect-current {
+  margin-top: 14px;
+  color: var(--mint);
+  font-size: 10px;
+}
+@media (min-width: 1700px) {
+  .canvas {
+    height: 440px;
+  }
+  .journey-now {
+    min-height: 71px;
+  }
+}
+@media (max-width: 1100px) {
+  .packet-explanation {
+    grid-column: 2;
+    grid-row: 2/6;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .lesson-detail:has(.packet-explanation) > .insight {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 18px;
+  }
+  .lesson-detail:has(.packet-explanation) .reference-link {
+    grid-column: 1/-1;
+  }
+  .canvas {
+    height: 400px;
+  }
+}
+@media (max-width: 640px) {
+  .canvas {
+    height: 335px;
+  }
+  .diagram-tools {
+    padding: 12px 13px 0;
+    gap: 7px;
+  }
+  .follow-packet {
+    font-size: 9px;
+    padding: 7px;
+    gap: 5px;
+  }
+  .zoom-controls button {
+    width: 25px;
+    height: 27px;
+  }
+  .zoom-controls output {
+    font-size: 8px;
+    width: 34px;
+  }
+  .diagram-hint {
+    padding: 0 13px 9px;
+    font-size: 8px;
+    gap: 5px;
+  }
+  .diagram-hint > span:first-child {
+    max-width: 210px;
+  }
+  .protected-tag {
+    font-size: 7px;
+  }
+  .journey-readout {
+    padding: 15px 14px 13px;
+  }
+  .journey-message {
+    gap: 7px;
+  }
+  .journey-message strong {
+    font-size: 11px;
+  }
+  .message-number {
+    font-size: 9px;
+  }
+  .journey-route {
+    font-size: 8px;
+    gap: 5px;
+  }
+  .packet-stages {
+    gap: 10px;
+    margin: 15px 0 12px;
+  }
+  .packet-stages button {
+    font-size: 9px;
+    gap: 6px;
+  }
+  .journey-now {
+    min-height: 97px;
+  }
+  .journey-now p {
+    font-size: 11px;
+  }
+  .packet-scrubber {
+    gap: 8px;
+  }
+  .packet-scrubber > span {
+    font-size: 8px;
+  }
+  .packet-explanation {
+    padding-top: 19px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    width: 100%;
+  }
+  .packet-explanation h3 {
+    font-size: 14px;
+  }
+  .packet-explanation > p,
+  .packet-context p {
+    font-size: 12px;
+  }
+  .packet-context summary {
+    font-size: 11px;
+  }
+  .inspect-current {
+    font-size: 11px;
+  }
+  .diagram-expanded .canvas {
+    height: 390px;
+  }
+}

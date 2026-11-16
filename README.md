@@ -7,8 +7,10 @@ This is an independent implementation inspired by [Protocol Explorer](https://pr
 ## Features
 
 - **20 complete lessons:** HTTP, HTTPS, WebSocket, TCP, UDP, QUIC, DNS, IPv4, IPv6, ICMP, ARP, DHCP, Ethernet, Wi-Fi, TLS, SSH, SMTP, IMAP, FTP, and NTP.
-- Animated network diagrams and interactive sequence diagrams.
-- Play, pause, restart, speed control, step navigation, and packet-by-packet progression.
+- Animated network diagrams with zoom, drag-to-pan, fit, and a camera that follows the packet.
+- Live explanations for preparation, forwarding, arrival, and packet loss, plus message fields and next actions.
+- Play, pause, restart, speed control, step navigation, and a scrubber for each packet. Pausing holds the packet in place; resuming continues from that position.
+- Interactive sequence diagrams with stable device lanes and automatic scrolling to the current message.
 - Guided and advanced learning modes, a packet inspector, and JSON trace export.
 - Searchable, categorized protocol library, 24-term glossary, and protocol reference table.
 - Four learning paths, lesson progress, and a knowledge check for every protocol.
@@ -29,7 +31,7 @@ Open the URL printed by Vite, usually `http://localhost:5173`.
 ```bash
 npm run build       # TypeScript check + production bundle in dist/
 npm run preview     # Serve the production bundle locally
-npm test            # Lesson data and persistence validation
+npm test            # Lesson data, persistence, playback, and route validation
 npm run test:e2e     # Browser interaction tests
 ```
 
@@ -68,6 +70,7 @@ src/
   styles.css                   Responsive design system and themes
   components/
     NetworkDiagram.tsx         Network and sequence renderers
+    PacketJourney.tsx          Live journey stages, scrubber, and packet explanations
     LessonDetail.tsx           Guided explanation and knowledge checks
     PacketInspector.tsx        Message fields and decoded-content viewer
     LearningViews.tsx          Learning paths, glossary, and protocol reference
@@ -76,6 +79,10 @@ src/
     protocols.ts               Typed lesson, device, packet, and quiz definitions
     glossary.ts                Networking terminology
     protocols.test.ts          Data and progress validation
+  simulation/
+    playback.ts                Shared animation clock with pause, seek, and speed control
+    journey.ts                 Route geometry and protocol explanations
+    playback.test.ts           Playback, route, and narration checks
   main.tsx                     React entry point and self-hosted fonts
 tests/explorer.spec.ts         Desktop and mobile browser tests
 ```
@@ -100,6 +107,8 @@ Add a `Protocol` in `src/data/protocols.ts`, with a unique ID, diagram devices, 
 | Open help                      | ?                   |
 
 Native button keyboard behavior is preserved when a button has focus. Shortcuts do not interrupt text input or open dialogs.
+
+When the network canvas has keyboard focus, **+ / −** zoom, **arrow keys** pan, and **0 / Home** fit the entire network. Drag the zoomed canvas to pan, or choose **Follow packet** for automatic tracking at 170%. The stage buttons and packet scrubber pause playback so you can study any point in an exchange. Reduced-motion mode replaces continuous packet and camera movement with discrete state updates.
 
 ## Educational scope and privacy
 

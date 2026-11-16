@@ -49,6 +49,9 @@ import LessonDetail, { layerName } from './components/LessonDetail';
 import PacketInspector from './components/PacketInspector';
 import { LearningPath, ReferenceView } from './components/LearningViews';
 import Modal from './components/Modal';
+import { usePlaybackClock } from './simulation/playback';
+import { JourneyReadout, LessonPlaybackProgress } from './components/PacketJourney';
+import { friendlyPacketLabel } from './simulation/journey';
 
 type Section = 'explorer' | 'path' | 'reference';
 interface Frame {
@@ -187,18 +190,34 @@ export default function App() {
     mainRef.current?.scrollTo({ top: 0 });
   }
   function finish() {
+    clock.pause();
+    clock.seek(1);
     setPlaying(false);
     setDone(true);
     complete(protocol.id);
   }
-  useEffect(() => {
-    if (!playing) return;
-    const timer = setTimeout(() => {
+  const clock = usePlaybackClock({
+    frameKey: `${protocol.id}:${frameIndex}`,
+    playing,
+    speed,
+    onComplete: () => {
       if (frameIndex >= frames.length - 1) finish();
       else setFrameIndex((i) => i + 1);
-    }, 2200 / speed);
-    return () => clearTimeout(timer);
-  }, [playing, frameIndex, frames.length, speed, protocol.id]);
+    },
+  });
+  useEffect(() => {
+    const hide = () => {
+      if (document.hidden) setPlaying(false);
+    };
+    document.addEventListener('visibilitychange', hide);
+    return () => document.removeEventListener('visibilitychange', hide);
+  }, []);
+  function seekPacket(progress: number) {
+    clock.pause();
+    setPlaying(false);
+    setDone(false);
+    clock.seek(progress);
+  }
   function togglePlay() {
     if (playing) {
       setPlaying(false);
@@ -211,11 +230,15 @@ export default function App() {
     setPlaying(true);
   }
   function reset() {
+    clock.pause();
+    clock.seek(0);
     setFrameIndex(-1);
     setPlaying(false);
     setDone(false);
   }
   function goStep(step: number) {
+    clock.pause();
+    clock.seek(0);
     setPlaying(false);
     if (step >= protocol.steps.length) {
       finish();
@@ -689,10 +712,10 @@ export default function App() {
                 <div className="canvas" aria-label="Packet visualization">
                   {view === 'network' ? (
                     <NetworkDiagram
+                      key={protocol.id}
                       protocol={protocol}
                       packet={frame?.packet}
-                      playing={playing}
-                      speed={speed}
+                      clock={clock}
                       reducedMotion={reducedMotion}
                       compact={phone}
                     />
@@ -705,7 +728,7 @@ export default function App() {
                     />
                   )}
                 </div>
-                <div className="canvas-caption">
+                <div className={`canvas-caption ${frame?.packet && !done ? 'has-journey' : ''}`}>
                   <span className="canvas-message">
                     {done ? <Check size={13} /> : <Radio size={13} />}
                     <span>
@@ -722,13 +745,21 @@ export default function App() {
                     Play / pause <kbd>Space</kbd>
                   </span>
                 </div>
-                <div className="playback-progress">
-                  <i
-                    style={{
-                      width: `${done ? 100 : Math.max(0, ((frameIndex + 1) / frames.length) * 100)}%`,
-                    }}
+                {frame?.packet && !done && (
+                  <JourneyReadout
+                    protocol={protocol}
+                    packet={frame.packet}
+                    clock={clock}
+                    compact={phone}
+                    onSeek={seekPacket}
                   />
-                </div>
+                )}
+                <LessonPlaybackProgress
+                  clock={clock}
+                  index={frameIndex}
+                  total={frames.length}
+                  done={done}
+                />
                 <div className="playback">
                   <div className="playback-main">
                     <button
@@ -822,6 +853,8 @@ export default function App() {
                 onQuiz={() => complete(protocol.id, true)}
                 quizPassed={progress.quizzes.includes(protocol.id)}
                 onNext={nextLesson}
+                packet={frame?.packet}
+                onInspect={inspect}
               />
               <section className="journey panel" aria-label="Lesson steps">
                 <div className="journey-title">
@@ -916,7 +949,7 @@ export default function App() {
                             </td>
                             <td className="packet-info">
                               {p.encrypted && <LockKeyhole size={11} />}
-                              <span>{p.label}</span>
+                              <span title={p.label}>{friendlyPacketLabel(p)}</span>
                               {p.lost && <span className="lost-tag">LOST</span>}
                             </td>
                             {advanced && <td className="mono">{p.port ?? '—'}</td>}
@@ -1004,6 +1037,9 @@ export default function App() {
                 ['Slower / faster', '[ / ]'],
                 ['Search protocols', '⌘ K / Ctrl K / /'],
                 ['Toggle light / dark theme', 'T'],
+                ['Zoom focused canvas', '+ / −'],
+                ['Pan focused canvas', 'Arrow keys'],
+                ['Fit focused canvas', '0'],
                 ['Open this guide', '?'],
               ].map(([label, key]) => (
                 <div key={label}>

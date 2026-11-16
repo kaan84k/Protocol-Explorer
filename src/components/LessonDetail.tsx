@@ -8,7 +8,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
-import type { Protocol } from '../data/protocols';
+import type { Protocol, TracePacket } from '../data/protocols';
+import { PacketNarration } from './PacketJourney';
 export default function LessonDetail({
   protocol,
   step,
@@ -17,6 +18,8 @@ export default function LessonDetail({
   onQuiz,
   onNext,
   quizPassed,
+  packet,
+  onInspect,
 }: {
   protocol: Protocol;
   step: number;
@@ -25,6 +28,8 @@ export default function LessonDetail({
   onQuiz: () => void;
   onNext: () => void;
   quizPassed: boolean;
+  packet?: TracePacket;
+  onInspect: (packet: TracePacket) => void;
 }) {
   const [answer, setAnswer] = useState<number | null>(null);
   const current = protocol.steps[step];
@@ -116,6 +121,8 @@ export default function LessonDetail({
                 </dd>
               </div>
             </dl>
+          ) : packet ? (
+            <PacketNarration packet={packet} onInspect={onInspect} />
           ) : (
             <div className="step-mini-list">
               {protocol.steps.map((s, i) => (
