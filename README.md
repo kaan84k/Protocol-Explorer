@@ -17,7 +17,7 @@ This is an independent implementation inspired by [Protocol Explorer](https://pr
 
 ## Run locally
 
-Requires **Node.js 22.12+** (Node 24 LTS recommended).
+Requires **Node.js 24 LTS**, matching the Vercel deployment and CI configuration.
 
 ```bash
 npm ci
@@ -51,10 +51,11 @@ This is a static application. There are no API keys, accounts, or backend servic
 
 ### Vercel
 
-1. Import this repository into Vercel.
-2. Select the **Vite** framework preset.
-3. Build command: `npm run build`. Output directory: `dist`.
-4. Deploy. Query-string lesson links work without SPA route rewrites.
+1. In Vercel, create a new project and import **kaan84k/Protocol-Explorer** from GitHub.
+2. Use the repository root (`./`) and the **Vite** framework preset.
+3. Deploy. The checked-in `vercel.json` sets installation to `npm ci`, building to `npm run build`, and output to `dist`. `package.json` selects Node.js 24.
+
+No environment variables are required. Query-string lesson links work without SPA route rewrites. Keep `main` as the production branch; once the GitHub repository is connected, new pushes to `main` deploy to production and pull requests get preview deployments. Vercel generates the site's URL after the first successful deployment.
 
 The same `dist/` output can be hosted on Netlify, Cloudflare Pages, or any static host. Assets use a relative base so hosting under a subdirectory is supported.
 
